@@ -773,3 +773,145 @@ footer {
         align-items: center;
     }
 }
+
+/* ===========================================
+   ACTIVITY LOG STYLES
+   Add this to the END of globals.css
+   =========================================== */
+
+/* Activity Section */
+.activity-section {
+  margin-top: 2rem;
+}
+
+/* Activity Log Card */
+.activity-log-card {
+  grid-column: 1 / -1;
+}
+
+.activity-log {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.activity-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-log::-webkit-scrollbar-track {
+  background: var(--ocean-dark);
+  border-radius: 3px;
+}
+
+.activity-log::-webkit-scrollbar-thumb {
+  background: var(--ocean-mid);
+  border-radius: 3px;
+}
+
+.activity-log::-webkit-scrollbar-thumb:hover {
+  background: var(--ocean-light);
+}
+
+/* Empty State */
+.activity-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.activity-empty .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.activity-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Activity List */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Activity Item */
+.activity-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-item:hover {
+  background: rgba(0, 102, 255, 0.05);
+}
+
+/* Activity Icon */
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 102, 255, 0.1);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Activity Content */
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-message {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+  word-wrap: break-word;
+}
+
+.activity-time {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: 'Space Mono', monospace;
+}
+
+.activity-action {
+  color: var(--ocean-light);
+  margin-left: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .activity-log {
+    max-height: 300px;
+  }
+  
+  .activity-item {
+    padding: 0.75rem;
+  }
+  
+  .activity-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .activity-message {
+    font-size: 0.9rem;
+  }
+}

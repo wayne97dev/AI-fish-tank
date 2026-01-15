@@ -87,7 +87,6 @@ function HealthScoreCard({ health }) {
   const score = health?.score ?? null
   const status = health?.status ?? 'unknown'
   
-  // Calculate stroke-dashoffset based on score (408 = full circle)
   const dashOffset = score !== null ? 408 - (408 * score / 100) : 408
   
   const getStatusText = () => {
@@ -182,6 +181,87 @@ function AIOutputCard({ ai }) {
   )
 }
 
+// Activity Log Component
+function ActivityLogCard({ history }) {
+  const formatTime = (timestamp) => {
+    if (!timestamp) return '--:--'
+    const date = new Date(timestamp)
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    })
+  }
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today'
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday'
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    }
+  }
+
+  const getActionIcon = (action) => {
+    switch(action) {
+      case 'feed': return '🍽️'
+      case 'lights_on': return '💡'
+      case 'lights_off': return '🌙'
+      case 'heater_on': return '🔥'
+      case 'heater_off': return '❄️'
+      default: return '💬'
+    }
+  }
+
+  const logs = history || []
+
+  return (
+    <div className="card activity-log-card">
+      <div className="card-header">
+        <div className="card-title">
+          <span className="icon">📜</span>
+          Claude Activity Log
+        </div>
+        <span className="card-badge">{logs.length} entries</span>
+      </div>
+      <div className="activity-log">
+        {logs.length === 0 ? (
+          <div className="activity-empty">
+            <span className="icon">🤖</span>
+            <p>No activity yet. Waiting for Claude...</p>
+          </div>
+        ) : (
+          <div className="activity-list">
+            {logs.map((entry, index) => (
+              <div key={index} className="activity-item">
+                <div className="activity-icon">
+                  {getActionIcon(entry.action)}
+                </div>
+                <div className="activity-content">
+                  <div className="activity-message">{entry.message}</div>
+                  <div className="activity-time">
+                    {formatDate(entry.timestamp)} at {formatTime(entry.timestamp)}
+                    {entry.action && (
+                      <span className="activity-action">• Action: {entry.action}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Sensors Card Component
 function SensorsCard({ sensors }) {
   const formatValue = (value, unit, decimals = 1) => {
@@ -212,7 +292,7 @@ function SensorsCard({ sensors }) {
       icon: '⚗️', 
       value: formatValue(sensors?.ammonia, ' ppm', 2), 
       label: 'Ammonia', 
-      status: sensors?.ammonia !== null ? 'optimal' : null 
+      status: sensors?.ammonia !== null && sensors?.ammonia !== undefined ? 'optimal' : null 
     },
   ]
   
@@ -448,6 +528,11 @@ export default function Home() {
           <SensorsCard sensors={data.sensors} />
           <DeviceStatusCard devices={data.devices} />
           <TokenMetricsCard token={data.token} />
+        </div>
+        
+        {/* Activity Log - Full Width */}
+        <div className="activity-section">
+          <ActivityLogCard history={data.ai?.history} />
         </div>
       </main>
 
