@@ -75,7 +75,7 @@ function CameraCard() {
         </div>
         <div className="camera-placeholder">
           <div className="icon">🐠</div>
-          <p>Camera feed loading...</p>
+          <p>Camera feed coming soon...</p>
         </div>
       </div>
     </div>
@@ -83,8 +83,23 @@ function CameraCard() {
 }
 
 // Health Score Component
-function HealthScoreCard() {
-  const [score, setScore] = useState('--')
+function HealthScoreCard({ health }) {
+  const score = health?.score ?? '--'
+  const status = health?.status ?? 'Waiting for data...'
+  
+  // Calculate stroke offset for circle (408 is circumference)
+  const strokeOffset = score !== '--' ? 408 - (408 * score / 100) : 408
+  
+  const statusColors = {
+    'excellent': '#00E676',
+    'good': '#00E676',
+    'fair': '#FFB300',
+    'poor': '#FF5252',
+    'critical': '#FF5252',
+    'unknown': '#8ba3c7'
+  }
+  
+  const statusColor = statusColors[status] || statusColors['unknown']
   
   return (
     <div className="card">
@@ -104,22 +119,31 @@ function HealthScoreCard() {
               </linearGradient>
             </defs>
             <circle className="score-bg" cx="80" cy="80" r="65" />
-            <circle className="score-fill" cx="80" cy="80" r="65" />
+            <circle 
+              className="score-fill" 
+              cx="80" 
+              cy="80" 
+              r="65" 
+              style={{ strokeDashoffset: strokeOffset }}
+            />
           </svg>
           <div className="score-value">
             <div className="score-number">{score}</div>
             <div className="score-label">Health</div>
           </div>
         </div>
-        <div className="score-status">Waiting for data...</div>
+        <div className="score-status" style={{ color: statusColor }}>
+          {status === 'unknown' ? 'Waiting for data...' : status.charAt(0).toUpperCase() + status.slice(1)}
+        </div>
       </div>
     </div>
   )
 }
 
 // AI Output Component
-function AIOutputCard() {
-  const [message, setMessage] = useState('Connecting to aquarium systems...')
+function AIOutputCard({ ai }) {
+  const message = ai?.lastMessage ?? 'Connecting to aquarium systems...'
+  const isOnline = ai?.isOnline ?? false
   
   return (
     <div className="card">
@@ -134,10 +158,12 @@ function AIOutputCard() {
           <div className="ai-avatar">🧠</div>
           <div>
             <div className="ai-name">Claude AI</div>
-            <div className="ai-status">● Online</div>
+            <div className="ai-status" style={{ color: isOnline ? '#00E676' : '#8ba3c7' }}>
+              ● {isOnline ? 'Online' : 'Offline'}
+            </div>
           </div>
         </div>
-        <div className="ai-message typing">
+        <div className={`ai-message ${!isOnline ? 'typing' : ''}`}>
           {message}
         </div>
       </div>
@@ -146,12 +172,32 @@ function AIOutputCard() {
 }
 
 // Sensors Card Component
-function SensorsCard() {
-  const sensors = [
-    { icon: '🌡️', value: '--°C', label: 'Water Temp', status: 'optimal' },
-    { icon: '💧', value: '--', label: 'pH Level', status: 'optimal' },
-    { icon: '🫧', value: '--%', label: 'Oxygen', status: 'optimal' },
-    { icon: '⚗️', value: '--', label: 'Ammonia', status: 'optimal' },
+function SensorsCard({ sensors }) {
+  const sensorData = [
+    { 
+      icon: '🌡️', 
+      value: sensors?.temperature !== null ? `${sensors.temperature}°C` : '--°C', 
+      label: 'Water Temp', 
+      status: sensors?.temperature ? 'optimal' : 'unknown'
+    },
+    { 
+      icon: '💧', 
+      value: sensors?.ph !== null ? sensors.ph : '--', 
+      label: 'pH Level', 
+      status: sensors?.ph ? 'optimal' : 'unknown'
+    },
+    { 
+      icon: '🫧', 
+      value: sensors?.oxygen !== null ? `${sensors.oxygen}%` : '--%', 
+      label: 'Oxygen', 
+      status: sensors?.oxygen ? 'optimal' : 'unknown'
+    },
+    { 
+      icon: '⚗️', 
+      value: sensors?.ammonia !== null ? sensors.ammonia : '--', 
+      label: 'Ammonia', 
+      status: sensors?.ammonia !== null ? (sensors.ammonia < 0.25 ? 'optimal' : 'warning') : 'unknown'
+    },
   ]
   
   return (
@@ -164,13 +210,13 @@ function SensorsCard() {
         <span className="card-badge">LIVE</span>
       </div>
       <div className="sensors-grid">
-        {sensors.map((sensor, index) => (
+        {sensorData.map((sensor, index) => (
           <div key={index} className="sensor-item">
             <div className="sensor-icon">{sensor.icon}</div>
             <div className="sensor-value">{sensor.value}</div>
             <div className="sensor-label">{sensor.label}</div>
             <div className={`sensor-status ${sensor.status}`}>
-              {sensor.status === 'optimal' ? 'Optimal' : 'Warning'}
+              {sensor.status === 'optimal' ? 'Optimal' : sensor.status === 'warning' ? 'Warning' : 'No data'}
             </div>
           </div>
         ))}
@@ -180,14 +226,44 @@ function SensorsCard() {
 }
 
 // Device Status Component
-function DeviceStatusCard() {
-  const devices = [
-    { icon: '💡', name: 'LED Light', status: 'on', active: true },
-    { icon: '🔥', name: 'Heater', status: 'on', active: true },
-    { icon: '🍽️', name: 'Feeder', status: 'off', active: false },
-    { icon: '🌊', name: 'Filter', status: 'on', active: true },
-    { icon: '📷', name: 'Camera', status: 'on', active: true },
-    { icon: '💨', name: 'Air Pump', status: 'off', active: false },
+function DeviceStatusCard({ devices }) {
+  const deviceList = [
+    { 
+      icon: '💡', 
+      name: 'LED Light', 
+      status: devices?.light?.status || 'off',
+      active: devices?.light?.status === 'on'
+    },
+    { 
+      icon: '🔥', 
+      name: 'Heater', 
+      status: devices?.heater?.status || 'off',
+      active: devices?.heater?.status === 'on'
+    },
+    { 
+      icon: '🍽️', 
+      name: 'Feeder', 
+      status: devices?.feeder?.status || 'idle',
+      active: devices?.feeder?.status === 'feeding'
+    },
+    { 
+      icon: '🌊', 
+      name: 'Filter', 
+      status: devices?.filter?.status || 'on',
+      active: devices?.filter?.status === 'on'
+    },
+    { 
+      icon: '📷', 
+      name: 'Camera', 
+      status: devices?.camera?.status || 'off',
+      active: devices?.camera?.status === 'on'
+    },
+    { 
+      icon: '💨', 
+      name: 'Air Pump', 
+      status: devices?.airPump?.status || 'off',
+      active: devices?.airPump?.status === 'on'
+    },
   ]
   
   return (
@@ -199,12 +275,12 @@ function DeviceStatusCard() {
         </div>
       </div>
       <div className="devices-grid">
-        {devices.map((device, index) => (
+        {deviceList.map((device, index) => (
           <div key={index} className={`device-item ${device.active ? 'active' : 'inactive'}`}>
             <div className="device-icon">{device.icon}</div>
             <div className="device-name">{device.name}</div>
-            <div className={`device-status ${device.status}`}>
-              {device.status === 'on' ? 'ON' : device.status === 'off' ? 'OFF' : 'IDLE'}
+            <div className={`device-status ${device.active ? 'on' : 'off'}`}>
+              {device.status.toUpperCase()}
             </div>
           </div>
         ))}
@@ -214,12 +290,12 @@ function DeviceStatusCard() {
 }
 
 // Token Metrics Component
-function TokenMetricsCard() {
+function TokenMetricsCard({ token }) {
   const metrics = [
-    { value: '$--', label: 'Market Cap' },
-    { value: '--', label: 'Holders' },
-    { value: '$--', label: 'ATH Market Cap' },
-    { value: '--', label: '24h Volume' },
+    { value: token?.marketCap ? `$${token.marketCap}` : '$--', label: 'Market Cap' },
+    { value: token?.holders ?? '--', label: 'Holders' },
+    { value: token?.athMarketCap ? `$${token.athMarketCap}` : '$--', label: 'ATH Market Cap' },
+    { value: token?.volume24h ?? '--', label: '24h Volume' },
   ]
   
   return (
@@ -307,6 +383,33 @@ function Footer() {
 
 // Main Page Component
 export default function Home() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch data from API
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/status')
+      const result = await response.json()
+      if (result.success) {
+        setData(result.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Initial fetch and polling every 10 seconds
+  useEffect(() => {
+    fetchData()
+    
+    const interval = setInterval(fetchData, 10000) // Poll every 10 seconds
+    
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <>
       {/* Background */}
@@ -325,11 +428,11 @@ export default function Home() {
       <main className="container">
         <div className="main-grid">
           <CameraCard />
-          <HealthScoreCard />
-          <AIOutputCard />
-          <SensorsCard />
-          <DeviceStatusCard />
-          <TokenMetricsCard />
+          <HealthScoreCard health={data?.health} />
+          <AIOutputCard ai={data?.ai} />
+          <SensorsCard sensors={data?.sensors} />
+          <DeviceStatusCard devices={data?.devices} />
+          <TokenMetricsCard token={data?.token} />
         </div>
       </main>
 
