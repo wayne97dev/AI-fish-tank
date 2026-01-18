@@ -915,3 +915,35 @@ footer {
     font-size: 0.9rem;
   }
 }
+/* Camera Image Styles */
+.camera-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.camera-analysis {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 102, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid var(--ocean-light);
+}
+
+.analysis-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--ocean-light);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.camera-analysis p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+}

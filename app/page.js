@@ -57,8 +57,22 @@ function Hero() {
   )
 }
 
-// Camera Card Component
-function CameraCard() {
+// Camera Card Component - UPDATED
+function CameraCard({ camera }) {
+  const hasImage = camera?.image
+  const timestamp = camera?.timestamp
+  
+  const formatTime = (ts) => {
+    if (!ts) return ''
+    const date = new Date(ts)
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false 
+    })
+  }
+  
   return (
     <div className="card camera-card">
       <div className="card-header">
@@ -66,18 +80,36 @@ function CameraCard() {
           <span className="icon">📷</span>
           Live Aquarium View
         </div>
-        <span className="card-badge">STREAMING</span>
+        <span className="card-badge">{hasImage ? 'LIVE' : 'OFFLINE'}</span>
       </div>
       <div className="camera-view">
-        <div className="camera-overlay">
-          <span className="live-dot"></span>
-          LIVE
-        </div>
-        <div className="camera-placeholder">
-          <div className="icon">🐠</div>
-          <p>Camera feed loading...</p>
-        </div>
+        {hasImage && (
+          <div className="camera-overlay">
+            <span className="live-dot"></span>
+            LIVE • {formatTime(timestamp)}
+          </div>
+        )}
+        {hasImage ? (
+          <img 
+            src={`data:image/jpeg;base64,${camera.image}`}
+            alt="Aquarium camera feed"
+            className="camera-image"
+          />
+        ) : (
+          <div className="camera-placeholder">
+            <div className="icon">🐠</div>
+            <p>Camera feed loading...</p>
+          </div>
+        )}
       </div>
+      {camera?.aiAnalysis && (
+        <div className="camera-analysis">
+          <div className="analysis-header">
+            <span>🤖</span> AI Analysis
+          </div>
+          <p>{camera.aiAnalysis}</p>
+        </div>
+      )}
     </div>
   )
 }
@@ -152,8 +184,8 @@ function HealthScoreCard({ health }) {
 
 // AI Output Component
 function AIOutputCard({ ai }) {
-  const message = ai?.lastMessage ?? 'Connecting to aquarium systems...'
-  const isOnline = ai?.isOnline ?? false
+  const message = ai?.lastComment ?? 'Connecting to aquarium systems...'
+  const isOnline = ai?.timestamp ? (Date.now() - new Date(ai.timestamp).getTime() < 300000) : false
   
   return (
     <div className="card">
@@ -475,10 +507,10 @@ export default function Home() {
     health: {},
     token: {}
   })
+  const [camera, setCamera] = useState({})
   const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState(null)
 
-  // Fetch data from API
+  // Fetch status data
   const fetchData = async () => {
     try {
       const response = await fetch('/api/status')
@@ -486,7 +518,6 @@ export default function Home() {
       
       if (result.success) {
         setData(result.data)
-        setLastUpdate(new Date())
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
@@ -495,14 +526,35 @@ export default function Home() {
     }
   }
 
+  // Fetch camera data
+  const fetchCamera = async () => {
+    try {
+      const response = await fetch('/api/camera')
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        setCamera(result.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch camera:', error)
+    }
+  }
+
   // Initial fetch and polling
   useEffect(() => {
     fetchData()
+    fetchCamera()
     
-    // Poll every 10 seconds
-    const interval = setInterval(fetchData, 10000)
+    // Poll status every 10 seconds
+    const statusInterval = setInterval(fetchData, 10000)
     
-    return () => clearInterval(interval)
+    // Poll camera every 30 seconds
+    const cameraInterval = setInterval(fetchCamera, 30000)
+    
+    return () => {
+      clearInterval(statusInterval)
+      clearInterval(cameraInterval)
+    }
   }, [])
 
   return (
@@ -522,7 +574,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container">
         <div className="main-grid">
-          <CameraCard />
+          <CameraCard camera={camera} />
           <HealthScoreCard health={data.health} />
           <AIOutputCard ai={data.ai} />
           <SensorsCard sensors={data.sensors} />
