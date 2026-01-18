@@ -59,25 +59,25 @@ function Hero() {
 }
 
 function CameraCard({ camera, streamUrl }) {
-  const [liveTime, setLiveTime] = useState(new Date())
-  const [useStream, setUseStream] = useState(!!streamUrl)
+  const [liveTime, setLiveTime] = useState('')
+  const [useStream, setUseStream] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const hasImage = camera?.image
   
   useEffect(() => {
+    setMounted(true)
+    setUseStream(!!streamUrl)
+    
     const timer = setInterval(() => {
-      setLiveTime(new Date())
+      setLiveTime(new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false 
+      }))
     }, 1000)
     return () => clearInterval(timer)
-  }, [])
-  
-  const formatTime = () => {
-    return liveTime.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false 
-    })
-  }
+  }, [streamUrl])
   
   return (
     <div className="card camera-card">
@@ -91,9 +91,9 @@ function CameraCard({ camera, streamUrl }) {
       <div className="camera-view">
         <div className="camera-overlay">
           <span className="live-dot"></span>
-          LIVE • {formatTime()}
+          LIVE • {liveTime || '--:--:--'}
         </div>
-        {useStream ? (
+        {mounted && useStream ? (
           <LiveStream streamUrl={streamUrl} />
         ) : hasImage ? (
           <img 
@@ -580,7 +580,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container">
         <div className="main-grid">
-          <CameraCard camera={camera} streamUrl="http://192.168.76.162:8888/fishtank/index.m3u8" />
+          <CameraCard camera={camera} streamUrl="https://subsection-switched-sponsor-yen.trycloudflare.com/fishtank/index.m3u8" />
           <HealthScoreCard health={data.health} />
           <AIOutputCard ai={data.ai} />
           <SensorsCard sensors={data.sensors} />
