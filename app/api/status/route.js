@@ -1,50 +1,72 @@
 let tankData = {
   devices: {
-    light: false,
-    heater: false,
-    feeder: false,
-    filter: true,
-    camera: false,
-    airpump: true
+    light: { status: 'off' },
+    heater: { status: 'off' },
+    feeder: { status: 'off' },
+    filter: { status: 'on' },
+    camera: { status: 'off' },
+    airPump: { status: 'on' }
   },
   ai: {
     lastComment: "Waiting for connection...",
     lastAction: "",
-    timestamp: null
+    timestamp: null,
+    history: []
   },
-  log: []
+  health: {
+    score: 85,
+    status: "Healthy"
+  },
+  sensors: {
+    temperature: 25,
+    ph: 7.2,
+    oxygen: 8.1,
+    ammonia: 0
+  },
+  token: {
+    marketCap: null,
+    holders: null,
+    athMarketCap: null,
+    volume24h: null
+  }
 };
 
 export async function GET() {
-  return Response.json(tankData);
+  return Response.json({ success: true, data: tankData });
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
     
+    // Update devices
     if (data.devices) {
-      tankData.devices = { ...tankData.devices, ...data.devices };
+      Object.keys(data.devices).forEach(key => {
+        const value = data.devices[key];
+        tankData.devices[key] = { 
+          status: value === true || value === 'on' ? 'on' : 'off' 
+        };
+      });
     }
     
+    // Update AI
     if (data.ai) {
-      tankData.ai = {
-        lastComment: data.ai.comment || tankData.ai.lastComment,
-        lastAction: data.ai.action || tankData.ai.lastAction,
-        timestamp: new Date().toISOString()
-      };
+      tankData.ai.lastComment = data.ai.comment || tankData.ai.lastComment;
+      tankData.ai.lastAction = data.ai.action || tankData.ai.lastAction;
+      tankData.ai.timestamp = new Date().toISOString();
     }
     
+    // Add to history/log
     if (data.log) {
-      tankData.log.unshift({
+      tankData.ai.history.unshift({
         message: data.log,
         timestamp: new Date().toISOString()
       });
-      tankData.log = tankData.log.slice(0, 50);
+      tankData.ai.history = tankData.ai.history.slice(0, 50);
     }
     
     return Response.json({ success: true });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
