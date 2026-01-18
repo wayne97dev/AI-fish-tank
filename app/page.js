@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import LiveStream from '../components/LiveStream'
 
 // Bubbles Component
 function Bubbles() {
@@ -57,12 +58,11 @@ function Hero() {
   )
 }
 
-// Camera Card Component with LIVE clock
-function CameraCard({ camera }) {
+function CameraCard({ camera, streamUrl }) {
   const [liveTime, setLiveTime] = useState(new Date())
+  const [useStream, setUseStream] = useState(!!streamUrl)
   const hasImage = camera?.image
   
-  // Update clock every second
   useEffect(() => {
     const timer = setInterval(() => {
       setLiveTime(new Date())
@@ -86,16 +86,16 @@ function CameraCard({ camera }) {
           <span className="icon">📷</span>
           Live Aquarium View
         </div>
-        <span className="card-badge">{hasImage ? 'LIVE' : 'OFFLINE'}</span>
+        <span className="card-badge">{(useStream || hasImage) ? 'LIVE' : 'OFFLINE'}</span>
       </div>
       <div className="camera-view">
-        {hasImage && (
-          <div className="camera-overlay">
-            <span className="live-dot"></span>
-            LIVE • {formatTime()}
-          </div>
-        )}
-        {hasImage ? (
+        <div className="camera-overlay">
+          <span className="live-dot"></span>
+          LIVE • {formatTime()}
+        </div>
+        {useStream ? (
+          <LiveStream streamUrl={streamUrl} />
+        ) : hasImage ? (
           <img 
             src={`data:image/jpeg;base64,${camera.image}`}
             alt="Aquarium camera feed"
@@ -580,7 +580,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container">
         <div className="main-grid">
-          <CameraCard camera={camera} />
+          <CameraCard camera={camera} streamUrl="http://192.168.76.162:8888/fishtank/index.m3u8" />
           <HealthScoreCard health={data.health} />
           <AIOutputCard ai={data.ai} />
           <SensorsCard sensors={data.sensors} />
