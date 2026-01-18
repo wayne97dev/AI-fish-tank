@@ -14,7 +14,6 @@ export async function GET() {
     
     return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
   } catch (error) {
-    console.error('Camera GET error:', error);
     return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
   }
 }
@@ -32,12 +31,12 @@ export async function POST(request) {
     
     await put('camera-data.json', JSON.stringify(cameraData), {
       access: 'public',
-      addRandomSuffix: false
+      addRandomSuffix: false,
+      allowOverwrite: true
     });
     
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Camera POST error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
