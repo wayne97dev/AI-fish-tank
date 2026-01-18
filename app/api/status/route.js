@@ -25,9 +25,10 @@ const defaultData = {
 
 async function getData() {
   try {
-    const { blobs } = await list({ prefix: 'status-' });
-    if (blobs.length > 0) {
-      const response = await fetch(blobs[blobs.length - 1].url);
+    const { blobs } = await list();
+    const statusBlob = blobs.find(b => b.pathname === 'status-data.json');
+    if (statusBlob) {
+      const response = await fetch(statusBlob.url);
       return await response.json();
     }
   } catch (e) {}
@@ -78,7 +79,8 @@ export async function POST(request) {
     
     await put('status-data.json', JSON.stringify(tankData), {
       access: 'public',
-      addRandomSuffix: false
+      addRandomSuffix: false,
+      allowOverwrite: true
     });
     
     return Response.json({ success: true });
