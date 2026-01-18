@@ -3,17 +3,18 @@ import { put, list } from '@vercel/blob';
 // GET
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: 'camera-' });
+    const { blobs } = await list();
+    const cameraBlob = blobs.find(b => b.pathname === 'camera-data.json');
     
-    if (blobs.length > 0) {
-      const latestBlob = blobs[blobs.length - 1];
-      const response = await fetch(latestBlob.url);
+    if (cameraBlob) {
+      const response = await fetch(cameraBlob.url);
       const data = await response.json();
       return Response.json({ success: true, data });
     }
     
     return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
   } catch (error) {
+    console.error('Camera GET error:', error);
     return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
   }
 }
@@ -36,7 +37,7 @@ export async function POST(request) {
     
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Camera API error:', error);
+    console.error('Camera POST error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
