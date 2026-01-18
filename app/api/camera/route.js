@@ -1,32 +1,42 @@
-// Store per l'immagine della camera
-let cameraData = {
-  image: null,           // Base64 dell'immagine
-  aiAnalysis: null,      // Analisi AI dell'immagine
-  timestamp: null        // Quando è stata catturata
-};
+import { put } from '@vercel/blob';
 
-// GET - Il sito legge l'immagine
-export async function GET() {
-  return Response.json({ 
-    success: true, 
-    data: cameraData 
+const BLOB_NAME = 'camera-data.json';
+
+async function getData() {
+  try {
+    const response = await fetch(`${process.env.BLOB_URL}/${BLOB_NAME}`);
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (e) {}
+  return { image: null, aiAnalysis: null, timestamp: null };
+}
+
+async function saveData(data) {
+  await put(BLOB_NAME, JSON.stringify(data), {
+    access: 'public',
+    addRandomSuffix: false
   });
 }
 
-// POST - Il Raspberry Pi invia l'immagine
+// GET
+export async function GET() {
+  const data = await getData();
+  return Response.json({ success: true, data });
+}
+
+// POST
 export async function POST(request) {
   try {
-    const data = await request.json();
+    const newData = await request.json();
     
-    if (data.image) {
-      cameraData.image = data.image;
-    }
+    const cameraData = {
+      image: newData.image || null,
+      aiAnalysis: newData.aiAnalysis || null,
+      timestamp: new Date().toISOString()
+    };
     
-    if (data.aiAnalysis) {
-      cameraData.aiAnalysis = data.aiAnalysis;
-    }
-    
-    cameraData.timestamp = new Date().toISOString();
+    await saveData(cameraData);
     
     return Response.json({ success: true });
   } catch (error) {
