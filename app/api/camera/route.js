@@ -1,28 +1,21 @@
-import { put } from '@vercel/blob';
-
-const BLOB_NAME = 'camera-data.json';
-
-async function getData() {
-  try {
-    const response = await fetch(`${process.env.BLOB_URL}/${BLOB_NAME}`);
-    if (response.ok) {
-      return await response.json();
-    }
-  } catch (e) {}
-  return { image: null, aiAnalysis: null, timestamp: null };
-}
-
-async function saveData(data) {
-  await put(BLOB_NAME, JSON.stringify(data), {
-    access: 'public',
-    addRandomSuffix: false
-  });
-}
+import { put, list } from '@vercel/blob';
 
 // GET
 export async function GET() {
-  const data = await getData();
-  return Response.json({ success: true, data });
+  try {
+    const { blobs } = await list({ prefix: 'camera-' });
+    
+    if (blobs.length > 0) {
+      const latestBlob = blobs[blobs.length - 1];
+      const response = await fetch(latestBlob.url);
+      const data = await response.json();
+      return Response.json({ success: true, data });
+    }
+    
+    return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
+  } catch (error) {
+    return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
+  }
 }
 
 // POST
@@ -36,10 +29,14 @@ export async function POST(request) {
       timestamp: new Date().toISOString()
     };
     
-    await saveData(cameraData);
+    await put('camera-data.json', JSON.stringify(cameraData), {
+      access: 'public',
+      addRandomSuffix: false
+    });
     
     return Response.json({ success: true });
   } catch (error) {
+    console.error('Camera API error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
