@@ -57,15 +57,21 @@ function Hero() {
   )
 }
 
-// Camera Card Component - UPDATED
+// Camera Card Component with LIVE clock
 function CameraCard({ camera }) {
+  const [liveTime, setLiveTime] = useState(new Date())
   const hasImage = camera?.image
-  const timestamp = camera?.timestamp
   
-  const formatTime = (ts) => {
-    if (!ts) return ''
-    const date = new Date(ts)
-    return date.toLocaleTimeString('en-US', { 
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+  
+  const formatTime = () => {
+    return liveTime.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
       second: '2-digit',
@@ -86,7 +92,7 @@ function CameraCard({ camera }) {
         {hasImage && (
           <div className="camera-overlay">
             <span className="live-dot"></span>
-            LIVE • {formatTime(timestamp)}
+            LIVE • {formatTime()}
           </div>
         )}
         {hasImage ? (
@@ -548,8 +554,8 @@ export default function Home() {
     // Poll status every 10 seconds
     const statusInterval = setInterval(fetchData, 10000)
     
-    // Poll camera every 30 seconds
-    const cameraInterval = setInterval(fetchCamera, 30000)
+    // Poll camera every 10 seconds
+    const cameraInterval = setInterval(fetchCamera, 10000)
     
     return () => {
       clearInterval(statusInterval)
