@@ -1,6 +1,4 @@
-import { put, get } from '@vercel/blob';
-
-const BLOB_NAME = 'tank-data.json';
+import { put, list } from '@vercel/blob';
 
 const defaultData = {
   devices: {
@@ -27,19 +25,13 @@ const defaultData = {
 
 async function getData() {
   try {
-    const response = await fetch(`${process.env.BLOB_URL}/${BLOB_NAME}`);
-    if (response.ok) {
+    const { blobs } = await list({ prefix: 'status-' });
+    if (blobs.length > 0) {
+      const response = await fetch(blobs[blobs.length - 1].url);
       return await response.json();
     }
   } catch (e) {}
   return defaultData;
-}
-
-async function saveData(data) {
-  await put(BLOB_NAME, JSON.stringify(data), {
-    access: 'public',
-    addRandomSuffix: false
-  });
 }
 
 // GET
@@ -54,7 +46,6 @@ export async function POST(request) {
     const newData = await request.json();
     let tankData = await getData();
     
-    // Update devices
     if (newData.devices) {
       tankData.devices = tankData.devices || {};
       Object.keys(newData.devices).forEach(key => {
@@ -65,19 +56,16 @@ export async function POST(request) {
       });
     }
     
-    // Update sensors
     if (newData.sensors) {
       tankData.sensors = { ...tankData.sensors, ...newData.sensors };
     }
     
-    // Update AI
     if (newData.ai) {
       tankData.ai = tankData.ai || { history: [] };
       tankData.ai.lastComment = newData.ai.comment || tankData.ai.lastComment;
       tankData.ai.timestamp = new Date().toISOString();
     }
     
-    // Add to history
     if (newData.log) {
       tankData.ai = tankData.ai || { history: [] };
       tankData.ai.history = tankData.ai.history || [];
@@ -88,7 +76,10 @@ export async function POST(request) {
       tankData.ai.history = tankData.ai.history.slice(0, 50);
     }
     
-    await saveData(tankData);
+    await put('status-data.json', JSON.stringify(tankData), {
+      access: 'public',
+      addRandomSuffix: false
+    });
     
     return Response.json({ success: true });
   } catch (error) {
