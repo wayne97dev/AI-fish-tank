@@ -580,7 +580,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container">
         <div className="main-grid">
-          <CameraCard camera={camera} streamUrl="https://surf-musical-villas-hopes.trycloudflare.com/fishtank/index.m3u8" />
+          <CameraCard camera={camera} streamUrl="https://gaps-functions-gem-denver.trycloudflare.com/fishtank/index.m3u8" />
           <HealthScoreCard health={data.health} />
           <AIOutputCard ai={data.ai} />
           <SensorsCard sensors={data.sensors} />
