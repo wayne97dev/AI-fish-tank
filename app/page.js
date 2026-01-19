@@ -21,12 +21,22 @@ function Header() {
       <div className="container">
         <div className="header-content">
           <div className="logo">
-            <div className="logo-icon">🐠</div>
+            <img 
+              src="/aquarium-logo.jpg" 
+              alt="AI Fish Tank" 
+              className="logo-image"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                objectFit: 'cover'
+              }}
+            />
             <span className="logo-text">AI Fish Tank</span>
             <span className="ticker">$AQUAI</span>
           </div>
           <nav className="nav-links">
-            <a href="#" className="nav-link" target="_blank" rel="noopener noreferrer">
+            <a href="https://x.com/ai_tankfish" className="nav-link" target="_blank" rel="noopener noreferrer">
               <span>𝕏</span>
               <span>Twitter</span>
             </a>
@@ -467,7 +477,7 @@ function AboutSection() {
               <span>🪙</span>
               <span>Buy $AQUAI</span>
             </a>
-            <a href="#" className="cta-btn secondary">
+            <a href="https://x.com/ai_tankfish" className="cta-btn secondary" target="_blank" rel="noopener noreferrer">
               <span>𝕏</span>
               <span>Follow Updates</span>
             </a>
@@ -492,7 +502,7 @@ function Footer() {
     <footer>
       <div className="container">
         <div className="footer-links">
-          <a href="#" className="footer-link">Twitter</a>
+          <a href="https://x.com/ai_tankfish" className="footer-link" target="_blank" rel="noopener noreferrer">Twitter</a>
           <a href="#" className="footer-link">Dexscreener</a>
           <a href="#" className="footer-link">Pump.fun</a>
         </div>
