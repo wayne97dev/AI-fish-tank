@@ -29,18 +29,21 @@ async function getData() {
   try {
     const response = await fetch(BLOB_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (response.ok) {
-      return await response.json();
+      const text = await response.text();
+      if (text && text.startsWith('{')) {
+        return JSON.parse(text);
+      }
     }
   } catch (e) {
     console.error('getData error:', e);
   }
-  return defaultData;
+  return null; // Return null instead of defaultData
 }
 
 // GET
 export async function GET() {
   const data = await getData();
-  return Response.json({ success: true, data }, { 
+  return Response.json({ success: true, data: data || defaultData }, { 
     headers: { 
       "Cache-Control": "no-store, no-cache, must-revalidate",
       "Pragma": "no-cache"
@@ -53,6 +56,15 @@ export async function POST(request) {
   try {
     const newData = await request.json();
     let tankData = await getData();
+    
+    // If we couldn't read existing data, only proceed if this is an important update (has log entry)
+    if (!tankData) {
+      if (!newData.log) {
+        // Skip saving for regular status updates when we can't read data
+        return Response.json({ success: true, skipped: true });
+      }
+      tankData = defaultData;
+    }
     
     if (newData.devices) {
       tankData.devices = tankData.devices || {};
