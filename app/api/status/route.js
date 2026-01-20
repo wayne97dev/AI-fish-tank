@@ -68,6 +68,10 @@ export async function POST(request) {
       tankData.ai.timestamp = new Date().toISOString();
     }
     
+    if (newData.health) {
+      tankData.health = newData.health;
+    }
+
     if (newData.log) {
       tankData.ai = tankData.ai || { history: [] };
       tankData.ai.history = tankData.ai.history || [];
