@@ -64,6 +64,7 @@ export async function POST(request) {
     if (newData.ai) {
       tankData.ai = tankData.ai || { history: [] };
       tankData.ai.lastComment = newData.ai.comment || tankData.ai.lastComment;
+      tankData.ai.shortSummary = newData.ai.shortSummary || tankData.ai.shortSummary;
       tankData.ai.timestamp = new Date().toISOString();
     }
     
