@@ -4,6 +4,9 @@ export const metadata = {
   title: 'AI Fish Tank | $AQUAI',
   description: 'Watch Claude AI autonomously care for a living aquarium ecosystem. Real-time decisions, 24/7 monitoring, complete AI control.',
   keywords: 'AI, fish tank, aquarium, Claude, crypto, memecoin, AQUAI',
+  icons: {
+    icon: '/favicon.svg',
+  },
   openGraph: {
     title: 'AI Fish Tank | $AQUAI',
     description: 'Watch Claude AI autonomously care for a living aquarium ecosystem.',
