@@ -29,16 +29,26 @@ async function getData() {
     const statusBlob = blobs.find(b => b.pathname === 'status-data.json');
     if (statusBlob) {
       const response = await fetch(statusBlob.url, { cache: 'no-store' });
-      return await response.json();
+      if (response.ok) {
+        return await response.json();
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('getData error:', e);
+  }
   return defaultData;
 }
 
 // GET
 export async function GET() {
   const data = await getData();
-  return Response.json({ success: true, data }, { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
+  return Response.json({ success: true, data }, { 
+    headers: { 
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    } 
+  });
 }
 
 // POST
