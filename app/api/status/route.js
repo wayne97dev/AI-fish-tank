@@ -28,7 +28,7 @@ async function getData() {
     const { blobs } = await list();
     const statusBlob = blobs.find(b => b.pathname === 'status-data.json');
     if (statusBlob) {
-      const response = await fetch(statusBlob.url);
+      const response = await fetch(statusBlob.url, { cache: 'no-store' });
       return await response.json();
     }
   } catch (e) {}
