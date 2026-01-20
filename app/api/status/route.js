@@ -14,7 +14,7 @@ const defaultData = {
     timestamp: null,
     history: []
   },
-  health: { score: 85, status: "good" },
+  health: { score: 80, status: "good" },
   sensors: {
     temperature: 25,
     ph: 7.2,
