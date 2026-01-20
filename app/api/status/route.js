@@ -3,7 +3,7 @@ export const revalidate = 0;
 
 import { put } from '@vercel/blob';
 
-const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-data.json';
+const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-v2.json';
 
 const defaultData = {
   devices: {
@@ -104,7 +104,7 @@ export async function POST(request) {
       tankData.ai.history = tankData.ai.history.slice(0, 50);
     }
     
-    await put('status-data.json', JSON.stringify(tankData), {
+    await put('status-v2.json', JSON.stringify(tankData), {
       access: 'public',
       addRandomSuffix: false,
       allowOverwrite: true

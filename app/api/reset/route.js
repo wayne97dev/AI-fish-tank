@@ -4,7 +4,7 @@ export async function GET() {
   try {
     const { blobs } = await list();
     for (const blob of blobs) {
-      if (blob.pathname === 'status-data.json') {
+      if (blob.pathname === 'status-v2.json') {
         await del(blob.url);
       }
     }
@@ -27,7 +27,7 @@ export async function GET() {
       sensors: { temperature: 25, ph: 7.2, oxygen: 8.1, ammonia: 0 }
     };
     
-    await put('status-data.json', JSON.stringify(freshData), {
+    await put('status-v2.json', JSON.stringify(freshData), {
       access: 'public',
       addRandomSuffix: false,
       allowOverwrite: true

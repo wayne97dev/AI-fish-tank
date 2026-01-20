@@ -3,7 +3,7 @@ export const revalidate = 0;
 
 import { put } from '@vercel/blob';
 
-const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/camera-data.json';
+const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/camera-v2.json';
 
 // GET
 export async function GET() {
@@ -34,7 +34,7 @@ export async function POST(request) {
       timestamp: new Date().toISOString()
     };
     
-    await put('camera-data.json', JSON.stringify(cameraData), {
+    await put('camera-v2.json', JSON.stringify(cameraData), {
       access: 'public',
       addRandomSuffix: false,
       allowOverwrite: true
