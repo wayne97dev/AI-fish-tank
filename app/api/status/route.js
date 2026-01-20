@@ -1,4 +1,6 @@
-import { put, list } from '@vercel/blob';
+import { put } from '@vercel/blob';
+
+const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-data.json';
 
 const defaultData = {
   devices: {
@@ -25,13 +27,9 @@ const defaultData = {
 
 async function getData() {
   try {
-    const { blobs } = await list();
-    const statusBlob = blobs.find(b => b.pathname === 'status-data.json');
-    if (statusBlob) {
-      const response = await fetch(statusBlob.url, { cache: 'no-store' });
-      if (response.ok) {
-        return await response.json();
-      }
+    const response = await fetch(BLOB_URL, { cache: 'no-store' });
+    if (response.ok) {
+      return await response.json();
     }
   } catch (e) {
     console.error('getData error:', e);
@@ -44,9 +42,8 @@ export async function GET() {
   const data = await getData();
   return Response.json({ success: true, data }, { 
     headers: { 
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      "Pragma": "no-cache",
-      "Expires": "0"
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "Pragma": "no-cache"
     } 
   });
 }

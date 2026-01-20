@@ -1,21 +1,23 @@
-import { put, list } from '@vercel/blob';
+import { put } from '@vercel/blob';
+
+const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/camera-data.json';
 
 // GET
 export async function GET() {
   try {
-    const { blobs } = await list();
-    const cameraBlob = blobs.find(b => b.pathname === 'camera-data.json');
-    
-    if (cameraBlob) {
-      const response = await fetch(cameraBlob.url, { cache: 'no-store' });
+    const response = await fetch(BLOB_URL, { cache: 'no-store' });
+    if (response.ok) {
       const data = await response.json();
-      return Response.json({ success: true, data }, { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
+      return Response.json({ success: true, data }, { 
+        headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } 
+      });
     }
-    
-    return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
-  } catch (error) {
-    return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
+  } catch (e) {
+    console.error('Camera getData error:', e);
   }
+  return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } }, { 
+    headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } 
+  });
 }
 
 // POST
