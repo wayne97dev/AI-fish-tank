@@ -7,7 +7,7 @@ export async function GET() {
     const cameraBlob = blobs.find(b => b.pathname === 'camera-data.json');
     
     if (cameraBlob) {
-      const response = await fetch(cameraBlob.url);
+      const response = await fetch(cameraBlob.url, { cache: 'no-store' });
       const data = await response.json();
       return Response.json({ success: true, data });
     }
