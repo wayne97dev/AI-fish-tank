@@ -5,7 +5,7 @@ const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/camera
 // GET
 export async function GET() {
   try {
-    const response = await fetch(BLOB_URL, { cache: 'no-store' });
+    const response = await fetch(BLOB_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (response.ok) {
       const data = await response.json();
       return Response.json({ success: true, data }, { 

@@ -27,7 +27,7 @@ const defaultData = {
 
 async function getData() {
   try {
-    const response = await fetch(BLOB_URL, { cache: 'no-store' });
+    const response = await fetch(BLOB_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (response.ok) {
       return await response.json();
     }
