@@ -38,7 +38,7 @@ async function getData() {
 // GET
 export async function GET() {
   const data = await getData();
-  return Response.json({ success: true, data });
+  return Response.json({ success: true, data }, { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
 }
 
 // POST

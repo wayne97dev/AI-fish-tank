@@ -9,7 +9,7 @@ export async function GET() {
     if (cameraBlob) {
       const response = await fetch(cameraBlob.url, { cache: 'no-store' });
       const data = await response.json();
-      return Response.json({ success: true, data });
+      return Response.json({ success: true, data }, { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }
     
     return Response.json({ success: true, data: { image: null, aiAnalysis: null, timestamp: null } });
