@@ -332,7 +332,7 @@ function SensorsCard({ sensors }) {
     },
     { 
       icon: '🫧', 
-      value: formatValue(sensors?.oxygen, '%', 0), 
+      value: formatValue(sensors?.oxygen, ' mg/L', 1), 
       label: 'Oxygen', 
       status: sensors?.oxygen ? 'optimal' : null 
     },
