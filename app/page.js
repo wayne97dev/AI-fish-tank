@@ -201,7 +201,7 @@ function HealthScoreCard({ health }) {
 // AI Output Component
 function AIOutputCard({ ai }) {
   const message = ai?.shortSummary ?? ai?.lastComment ?? 'Connecting to aquarium systems...'
-  const isOnline = ai?.timestamp ? (Date.now() - new Date(ai.timestamp).getTime() < 1500000) : false
+  const isOnline = ai?.timestamp ? (Date.now() - new Date(ai.timestamp).getTime() < 6000000) : false
   
   return (
     <div className="card">
