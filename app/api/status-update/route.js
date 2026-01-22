@@ -61,14 +61,14 @@ export async function POST(request) {
       tankData.ai.history = tankData.ai.history.slice(0, 50);
     }
     
-    await put('status-v2.json', JSON.stringify(tankData), {
+    const result = await put('status-v2.json', JSON.stringify(tankData), {
       access: 'public',
       addRandomSuffix: false,
       allowOverwrite: true
     });
     
-    return Response.json({ success: true });
+    return Response.json({ success: true, blobUrl: result.url, timestamp: tankData.ai?.timestamp });
   } catch (error) {
-    return Response.json({ success: false, error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message, stack: error.stack }, { status: 500 });
   }
 }
