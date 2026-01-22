@@ -30,7 +30,10 @@ const defaultData = {
 
 async function getData() {
   try {
-    const response = await fetch(BLOB_URL + '?nocache=' + Date.now() + Math.random(), { cache: 'no-store' });
+    const response = await fetch(BLOB_URL + '?nocache=' + Date.now() + Math.random(), { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     if (response.ok) {
       const text = await response.text();
       if (text && text.startsWith('{')) {
@@ -40,7 +43,7 @@ async function getData() {
   } catch (e) {
     console.error('getData error:', e);
   }
-  return null; // Return null instead of defaultData
+  return null;
 }
 
 // GET
@@ -60,13 +63,10 @@ export async function POST(request) {
     const newData = await request.json();
     let tankData = await getData();
     
-    // If we couldn't read existing data, only proceed if this is an important update (has log entry)
+    // NEVER overwrite with defaultData - skip if can't read
     if (!tankData) {
-      if (!newData.log) {
-        // Skip saving for regular status updates when we can't read data
-        return Response.json({ success: true, skipped: true });
-      }
-      tankData = defaultData;
+      console.error('Could not read blob data, skipping write to prevent data loss');
+      return Response.json({ success: false, error: 'Could not read existing data' }, { status: 500 });
     }
     
     if (newData.devices) {
