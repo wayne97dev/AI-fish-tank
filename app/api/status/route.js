@@ -51,16 +51,20 @@ async function getData() {
   return null;
 }
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
+  "CDN-Cache-Control": "no-store",
+  "Vercel-CDN-Cache-Control": "no-store",
+  "Pragma": "no-cache",
+  "Expires": "0",
+  "Surrogate-Control": "no-store"
+};
+
 // GET
 export async function GET() {
   const data = await getData();
   return Response.json({ success: true, data: data || defaultData }, { 
-    headers: { 
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
-      "Pragma": "no-cache",
-      "Expires": "0",
-      "Surrogate-Control": "no-store"
-    } 
+    headers: NO_CACHE_HEADERS
   });
 }
 
@@ -72,7 +76,7 @@ export async function POST(request) {
     
     if (!tankData) {
       console.error('Could not read blob data, skipping write to prevent data loss');
-      return Response.json({ success: false, error: 'Could not read existing data' }, { status: 500 });
+      return Response.json({ success: false, error: 'Could not read existing data' }, { status: 500, headers: NO_CACHE_HEADERS });
     }
     
     if (newData.devices) {
@@ -116,12 +120,8 @@ export async function POST(request) {
       allowOverwrite: true
     });
     
-    return Response.json({ success: true }, {
-      headers: {
-        "Cache-Control": "no-store"
-      }
-    });
+    return Response.json({ success: true }, { headers: NO_CACHE_HEADERS });
   } catch (error) {
-    return Response.json({ success: false, error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 }
