@@ -1,4 +1,6 @@
-export const runtime = 'edge';
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-v2.json';
 
@@ -26,34 +28,59 @@ const defaultData = {
 };
 
 const NO_CACHE_HEADERS = {
-  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  "Cache-Control": "private, no-store, no-cache, must-revalidate, max-age=0",
   "CDN-Cache-Control": "no-store",
-  "Vercel-CDN-Cache-Control": "no-store"
+  "Vercel-CDN-Cache-Control": "no-store",
+  "Pragma": "no-cache",
+  "Expires": "0"
 };
 
 // GET
-export async function GET() {
+export async function GET(request) {
+  const url = new URL(request.url);
+  const bustCache = url.searchParams.get('t') || Date.now();
+  
   try {
-    const response = await fetch(BLOB_URL + '?t=' + Date.now(), { 
-      cache: 'no-store'
+    const fetchUrl = `${BLOB_URL}?t=${bustCache}&r=${Math.random()}`;
+    const response = await fetch(fetchUrl, { 
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
     
     if (response.ok) {
       const data = await response.json();
-      return Response.json({ success: true, data }, { headers: NO_CACHE_HEADERS });
+      return new Response(JSON.stringify({ success: true, data }), { 
+        headers: {
+          ...NO_CACHE_HEADERS,
+          "Content-Type": "application/json"
+        }
+      });
     }
   } catch (e) {
     console.error('GET error:', e);
   }
   
-  return Response.json({ success: true, data: defaultData }, { headers: NO_CACHE_HEADERS });
+  return new Response(JSON.stringify({ success: true, data: defaultData }), { 
+    headers: {
+      ...NO_CACHE_HEADERS,
+      "Content-Type": "application/json"
+    }
+  });
 }
 
-// POST - Edge non supporta @vercel/blob, redirect al blob direttamente
+// POST
 export async function POST(request) {
-  // Per POST usiamo una route separata
-  return Response.json({ 
+  return new Response(JSON.stringify({ 
     success: false, 
     error: 'Use /api/status-update for POST requests' 
-  }, { status: 400, headers: NO_CACHE_HEADERS });
+  }), { 
+    status: 400, 
+    headers: {
+      ...NO_CACHE_HEADERS,
+      "Content-Type": "application/json"
+    }
+  });
 }
