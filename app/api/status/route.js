@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 import { put } from '@vercel/blob';
 
@@ -30,9 +31,13 @@ const defaultData = {
 
 async function getData() {
   try {
-    const response = await fetch(BLOB_URL + '?nocache=' + Date.now() + Math.random(), { 
+    const response = await fetch(BLOB_URL + '?v=' + Date.now() + '-' + Math.random(), { 
       cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
+      next: { revalidate: 0 },
+      headers: { 
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     });
     if (response.ok) {
       const text = await response.text();
@@ -51,8 +56,10 @@ export async function GET() {
   const data = await getData();
   return Response.json({ success: true, data: data || defaultData }, { 
     headers: { 
-      "Cache-Control": "no-store, no-cache, must-revalidate",
-      "Pragma": "no-cache"
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "Surrogate-Control": "no-store"
     } 
   });
 }
@@ -63,7 +70,6 @@ export async function POST(request) {
     const newData = await request.json();
     let tankData = await getData();
     
-    // NEVER overwrite with defaultData - skip if can't read
     if (!tankData) {
       console.error('Could not read blob data, skipping write to prevent data loss');
       return Response.json({ success: false, error: 'Could not read existing data' }, { status: 500 });
@@ -110,7 +116,11 @@ export async function POST(request) {
       allowOverwrite: true
     });
     
-    return Response.json({ success: true });
+    return Response.json({ success: true }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
   } catch (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
