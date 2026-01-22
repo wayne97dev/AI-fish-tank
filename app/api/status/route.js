@@ -30,7 +30,7 @@ const defaultData = {
 
 async function getData() {
   try {
-    const response = await fetch(BLOB_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    const response = await fetch(BLOB_URL + '?nocache=' + Date.now() + Math.random(), { cache: 'no-store' });
     if (response.ok) {
       const text = await response.text();
       if (text && text.startsWith('{')) {
