@@ -199,7 +199,7 @@ function HealthScoreCard({ health }) {
 }
 
 // AI Output Component
-function AIOutputCard({ ai }) {
+function AIOutputCard({ ai, tasks }) {
   const message = ai?.shortSummary ?? ai?.lastComment ?? 'Connecting to aquarium systems...'
   const isOnline = ai?.timestamp ? (Date.now() - new Date(ai.timestamp).getTime() < 6000000) : false
   
@@ -224,6 +224,14 @@ function AIOutputCard({ ai }) {
         <div className={`ai-message ${!isOnline ? 'typing' : ''}`}>
           {message}
         </div>
+        {tasks && tasks.length > 0 && (
+          <div className="ai-tasks" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>📋 Pending Tasks:</div>
+            {tasks.map((task, i) => (
+              <div key={i} style={{ fontSize: '13px', padding: '4px 0', color: 'var(--text-secondary)' }}>• {task}</div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -592,7 +600,7 @@ export default function Home() {
         <div className="main-grid">
           <CameraCard camera={camera} streamUrl="https://pgp-distinct-accidents-listening.trycloudflare.com/fishtank/index.m3u8" />
           <HealthScoreCard health={data.health} />
-          <AIOutputCard ai={data.ai} />
+          <AIOutputCard ai={data.ai} tasks={data.tasks} />
           <SensorsCard sensors={data.sensors} />
           <DeviceStatusCard devices={data.devices} />
           <TokenMetricsCard token={data.token} />

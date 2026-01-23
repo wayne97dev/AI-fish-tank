@@ -55,6 +55,10 @@ export async function POST(request) {
       tankData.health = newData.health;
     }
 
+    if (newData.tasks) {
+      tankData.tasks = newData.tasks;
+    }
+
     if (newData.log) {
       tankData.ai = tankData.ai || { history: [] };
       tankData.ai.history = tankData.ai.history || [];
