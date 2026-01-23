@@ -224,10 +224,10 @@ function AIOutputCard({ ai, tasks }) {
         <div className={`ai-message ${!isOnline ? 'typing' : ''}`}>
           {message}
         </div>
-        {tasks && tasks.length > 0 && (
+        {tasks && (Array.isArray(tasks) ? tasks.length > 0 : tasks && tasks !== "none") && (
           <div className="ai-tasks" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>📋 Pending Tasks:</div>
-            {tasks.map((task, i) => (
+            {(Array.isArray(tasks) ? tasks : [tasks]).map((task, i) => (
               <div key={i} style={{ fontSize: '13px', padding: '4px 0', color: 'var(--text-secondary)' }}>• {task}</div>
             ))}
           </div>
