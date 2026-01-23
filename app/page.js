@@ -587,7 +587,7 @@ export default function Home() {
       <div className="bg-ocean"></div>
       
       {/* Bubbles */}
-      <Bubbles />
+      {/* <Bubbles /> */}
 
       {/* Header */}
       <Header />
