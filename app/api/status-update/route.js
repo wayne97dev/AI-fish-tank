@@ -1,30 +1,34 @@
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
-import { put } from '@vercel/blob';
+import { kv } from '@vercel/kv';
 
-const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-v2.json';
-
-async function getData() {
-  try {
-    const response = await fetch(BLOB_URL + '?t=' + Date.now(), { cache: 'no-store' });
-    if (response.ok) {
-      return await response.json();
-    }
-  } catch (e) {
-    console.error('getData error:', e);
+const defaultData = {
+  devices: {
+    light: { status: 'off' },
+    heater: { status: 'off' },
+    feeder: { status: 'off' },
+    filter: { status: 'on' },
+    camera: { status: 'on' },
+    airPump: { status: 'on' }
+  },
+  ai: {
+    lastComment: "Waiting for connection...",
+    timestamp: null,
+    history: []
+  },
+  health: { score: 80, status: "good" },
+  sensors: {
+    temperature: 25,
+    ph: 7.2,
+    oxygen: 8.1,
+    ammonia: 0
   }
-  return null;
-}
+};
 
 export async function POST(request) {
   try {
     const newData = await request.json();
-    let tankData = await getData();
-    
-    if (!tankData) {
-      return Response.json({ success: false, error: 'Could not read existing data' }, { status: 500 });
-    }
+    let tankData = await kv.get('tank-status') || defaultData;
     
     if (newData.devices) {
       tankData.devices = tankData.devices || {};
@@ -61,14 +65,11 @@ export async function POST(request) {
       tankData.ai.history = tankData.ai.history.slice(0, 50);
     }
     
-    const result = await put('status-v2.json', JSON.stringify(tankData), {
-      access: 'public',
-      addRandomSuffix: false,
-      allowOverwrite: true
-    });
+    await kv.set('tank-status', tankData);
     
-    return Response.json({ success: true, blobUrl: result.url, timestamp: tankData.ai?.timestamp });
+    return Response.json({ success: true, timestamp: tankData.ai?.timestamp });
   } catch (error) {
-    return Response.json({ success: false, error: error.message, stack: error.stack }, { status: 500 });
+    console.error('KV POST error:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }

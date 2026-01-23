@@ -1,8 +1,6 @@
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
-const BLOB_URL = 'https://pbrf2lbsymd1vwdw.public.blob.vercel-storage.com/status-v2.json';
+import { kv } from '@vercel/kv';
 
 const defaultData = {
   devices: {
@@ -27,60 +25,19 @@ const defaultData = {
   }
 };
 
-const NO_CACHE_HEADERS = {
-  "Cache-Control": "private, no-store, no-cache, must-revalidate, max-age=0",
-  "CDN-Cache-Control": "no-store",
-  "Vercel-CDN-Cache-Control": "no-store",
-  "Pragma": "no-cache",
-  "Expires": "0"
-};
-
-// GET
-export async function GET(request) {
-  const url = new URL(request.url);
-  const bustCache = url.searchParams.get('t') || Date.now();
-  
+export async function GET() {
   try {
-    const fetchUrl = `${BLOB_URL}?t=${bustCache}&r=${Math.random()}`;
-    const response = await fetch(fetchUrl, { 
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return new Response(JSON.stringify({ success: true, data }), { 
-        headers: {
-          ...NO_CACHE_HEADERS,
-          "Content-Type": "application/json"
-        }
-      });
-    }
+    const data = await kv.get('tank-status');
+    return Response.json({ success: true, data: data || defaultData });
   } catch (e) {
-    console.error('GET error:', e);
+    console.error('KV GET error:', e);
+    return Response.json({ success: true, data: defaultData });
   }
-  
-  return new Response(JSON.stringify({ success: true, data: defaultData }), { 
-    headers: {
-      ...NO_CACHE_HEADERS,
-      "Content-Type": "application/json"
-    }
-  });
 }
 
-// POST
-export async function POST(request) {
-  return new Response(JSON.stringify({ 
+export async function POST() {
+  return Response.json({ 
     success: false, 
     error: 'Use /api/status-update for POST requests' 
-  }), { 
-    status: 400, 
-    headers: {
-      ...NO_CACHE_HEADERS,
-      "Content-Type": "application/json"
-    }
-  });
+  }, { status: 400 });
 }
