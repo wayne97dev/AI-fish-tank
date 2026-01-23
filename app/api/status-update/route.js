@@ -56,7 +56,7 @@ export async function POST(request) {
     }
 
     if (newData.tasks) {
-      tankData.tasks = newData.tasks;
+      tankData.tasks = typeof newData.tasks === "string" && newData.tasks !== "none" ? [newData.tasks] : (Array.isArray(newData.tasks) ? newData.tasks : []);
     }
 
     if (newData.log) {
