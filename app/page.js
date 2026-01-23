@@ -598,7 +598,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container">
         <div className="main-grid">
-          <CameraCard camera={camera} streamUrl="https://pgp-distinct-accidents-listening.trycloudflare.com/fishtank/index.m3u8" />
+          <CameraCard camera={camera} streamUrl="https://pgp-distinct-accidents-listening.trycloudflare.com/fishtank_h264/index.m3u8" />
           <HealthScoreCard health={data.health} />
           <AIOutputCard ai={data.ai} tasks={data.tasks} />
           <SensorsCard sensors={data.sensors} />
